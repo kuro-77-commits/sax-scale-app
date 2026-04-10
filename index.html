@@ -3,191 +3,420 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>SAX PRACTICE TOOL</title>
+<title>SAX SCALE MASTER</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/abcjs@6.2.2/dist/abcjs-basic-min.js"></script>
 
 <style>
   :root {
-    --bg: #0a0a0a;
-    --surface: #111111;
-    --border: #222222;
+    --bg: #0d0d0d;
+    --surface: #1a1a1a;
+    --border: #333;
     --gold: #c9a84c;
-    --gold-dim: #7a6030;
-    --amber: #ff9500;
-    --red: #ff3b30;
-    --green: #30d158;
     --text: #f0ece0;
-    --muted: #444;
+    --muted: #666;
     --font-display: 'Bebas Neue', sans-serif;
-    --font-mono: 'Share Tech Mono', monospace;
   }
 
-  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
 
   body {
     background: var(--bg);
     color: var(--text);
-    font-family: var(--font-mono);
+    font-family: 'Share Tech Mono', monospace;
     min-height: 100dvh;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: space-between;
-    overflow-x: hidden;
-    position: relative;
-    padding: env(safe-area-inset-top, 16px) 0 env(safe-area-inset-bottom, 16px);
+    padding: 12px 0 30px;
   }
 
-  /* HEADER */
-  header {
+  .app-header {
     width: 100%;
+    max-width: 600px;
+    padding: 0 12px 8px;
     display: flex;
+    align-items: baseline;
     justify-content: space-between;
-    align-items: center;
-    padding: 14px 24px 0;
-    z-index: 10;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 10px;
   }
+
   .app-title {
     font-family: var(--font-display);
-    font-size: 1.2rem;
-    letter-spacing: 0.3em;
+    font-size: 1.3rem;
     color: var(--gold);
+    letter-spacing: 0.2em;
   }
-  .app-title small { display: block; font-size: 0.55rem; color: var(--gold-dim); }
 
-  /* MODE TABS */
-  .mode-tabs {
-    display: flex;
-    width: calc(100% - 48px);
-    max-width: 520px;
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    margin-top: 10px;
-  }
-  .tab {
-    flex: 1;
-    font-family: var(--font-display);
-    font-size: 1rem;
-    padding: 10px 0;
-    background: transparent;
+  .app-sub {
+    font-size: 10px;
     color: var(--muted);
-    border: none;
-    cursor: pointer;
-  }
-  .tab.active { color: var(--gold); background: rgba(201,168,76,0.06); }
-
-  /* SHEET MUSIC AREA */
-  #sheetMusic {
-    width: calc(100% - 48px);
-    max-width: 520px;
-    background: #fff; /* 楽譜は見やすさ重視で白背景 */
-    border-radius: 8px;
-    margin: 15px 0;
-    padding: 10px;
-    min-height: 120px;
   }
 
-  /* TUNER & SCALE DISPLAYS */
-  #tunerMode, #scaleMode {
+  .main {
+    width: 100%;
+    max-width: 600px;
+    padding: 0 12px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    flex: 1;
+    gap: 12px;
+  }
+
+  /* 譜面 */
+  #sheetMusic {
     width: 100%;
-    padding: 0 24px;
+    background: #fff;
+    border-radius: 10px;
+    padding: 8px 4px;
+    min-height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
   }
 
-  .note-display {
-    font-family: var(--font-display);
-    font-size: clamp(100px, 25vw, 180px);
-    line-height: 1;
-    color: var(--text);
+  /* セクションラベル */
+  .section-label {
+    font-size: 10px;
+    color: var(--muted);
+    margin-bottom: 6px;
+    letter-spacing: 0.1em;
   }
 
+  .section { width: 100%; }
+
+  /* スケールボタン */
   .scale-selector {
     display: flex;
     flex-wrap: wrap;
     gap: 6px;
-    justify-content: center;
-    margin-bottom: 15px;
   }
+
   .scale-btn {
-    font-size: 10px;
-    padding: 6px 10px;
+    padding: 7px 10px;
+    background: var(--surface);
+    color: #888;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-size: 11px;
+    font-family: 'Share Tech Mono', monospace;
+    cursor: pointer;
+    transition: 0.15s;
+  }
+
+  .scale-btn.selected {
+    background: #252525;
+    color: var(--gold);
+    border-color: var(--gold);
+  }
+
+  /* 方向ボタン */
+  .dir-buttons {
+    display: flex;
+    gap: 6px;
+  }
+
+  .dir-btn {
+    flex: 1;
+    padding: 9px;
     background: var(--surface);
     color: var(--muted);
     border: 1px solid var(--border);
-    border-radius: 3px;
+    border-radius: 4px;
+    font-family: var(--font-display);
+    font-size: 0.9rem;
     cursor: pointer;
+    transition: 0.15s;
   }
-  .scale-btn.selected { color: var(--gold); border-color: var(--gold-dim); }
 
-  /* BOTTOM BAR */
-  .bottom-bar { width: 100%; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+  .dir-btn.selected {
+    background: #252525;
+    color: var(--gold);
+    border-color: var(--gold);
+  }
+
+  /* テンポ */
+  .tempo-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .tempo-row input[type=range] {
+    flex: 1;
+    accent-color: var(--gold);
+  }
+
+  .tempo-val {
+    font-size: 13px;
+    color: var(--gold);
+    min-width: 60px;
+  }
+
+  /* 現在の音 */
+  .note-area {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 4px 0;
+  }
+
+  .target-note {
+    font-family: var(--font-display);
+    font-size: 72px;
+    color: var(--gold);
+    min-width: 160px;
+    text-align: center;
+    line-height: 1;
+    letter-spacing: 0.02em;
+  }
+
+  .step-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 11px;
+    color: #555;
+    text-align: right;
+  }
+
+  /* STARTボタン */
   .start-btn {
     font-family: var(--font-display);
-    font-size: 1.4rem;
+    font-size: 1.8rem;
+    padding: 14px 80px;
     background: transparent;
     color: var(--gold);
-    border: 1px solid var(--gold);
-    padding: 12px 60px;
-    border-radius: 4px;
+    border: 2px solid var(--gold);
+    border-radius: 50px;
     cursor: pointer;
+    transition: 0.2s;
+    letter-spacing: 0.1em;
   }
-  .start-btn.running { background: var(--gold); color: var(--bg); }
 
+  .start-btn.running {
+    background: var(--gold);
+    color: #000;
+  }
 </style>
 </head>
 <body>
 
-<header>
-  <div class="app-title">
-    SAX PRACTICE APP
-    <small>ALTO E♭ MODE</small>
+<div class="app-header">
+  <span class="app-title">SAX SCALE MASTER</span>
+  <span class="app-sub">ALTO Eb · 2-OCT</span>
+</div>
+
+<div class="main">
+
+  <!-- 譜面 -->
+  <div id="sheetMusic"></div>
+
+  <!-- スケール選択 -->
+  <div class="section">
+    <div class="section-label">SCALE</div>
+    <div class="scale-selector" id="scaleSelector"></div>
   </div>
-</header>
 
-<div class="mode-tabs">
-  <button class="tab active" id="tabTuner" onclick="switchMode('tuner')">TUNER</button>
-  <button class="tab" id="tabScale" onclick="switchMode('scale')">SCALE</button>
-</div>
+  <!-- 方向選択 -->
+  <div class="section">
+    <div class="section-label">DIRECTION</div>
+    <div class="dir-buttons">
+      <button id="btn-up"     class="dir-btn selected" onclick="setDir('up')">▲ UP</button>
+      <button id="btn-updown" class="dir-btn"          onclick="setDir('updown')">▲▼ UP+DOWN</button>
+      <button id="btn-down"   class="dir-btn"          onclick="setDir('down')">▼ DOWN</button>
+    </div>
+  </div>
 
-<div id="sheetMusic"></div>
+  <!-- テンポ -->
+  <div class="section">
+    <div class="section-label">TEMPO — <span id="bpmLabel">60</span> BPM</div>
+    <div class="tempo-row">
+      <span style="font-size:11px;color:var(--muted);">40</span>
+      <input type="range" id="tempoSlider" min="40" max="160" value="60" step="1" oninput="updateTempo()">
+      <span style="font-size:11px;color:var(--muted);">160</span>
+    </div>
+  </div>
 
-<div id="tunerMode">
-  <div class="note-display" id="tunerNote">—</div>
-  <div id="freqReadout" style="color:var(--gold-dim)">0.0 Hz</div>
-</div>
+  <!-- 現在の音表示 -->
+  <div class="note-area">
+    <div class="target-note" id="targetNote">—</div>
+    <div class="step-info">
+      <span id="stepInfo">—</span>
+      <span id="dirInfo"></span>
+    </div>
+  </div>
 
-<div id="scaleMode" style="display:none">
-  <div class="scale-selector" id="scaleSelector"></div>
-  <div class="note-display" id="targetNote">—</div>
-  <div style="color:var(--gold-dim); letter-spacing: 0.2em;">NEXT NOTE</div>
-</div>
+  <!-- START/STOP -->
+  <button class="start-btn" id="startBtn" onclick="toggleStart()">START</button>
 
-<div class="bottom-bar">
-  <button class="start-btn" id="startBtn" onclick="toggleMain()">START</button>
-  <div style="margin-top:10px; font-size:10px; color:var(--muted)">1.0s Rhythm Guide Active</div>
 </div>
 
 <script>
-// ─── DATA & STATE ───────────────────────────────────────────
+// =============================================
+// スケールデータ（abc記法・記譜音）
+// =============================================
 const SCALES = {
-  'C Major':  ['C', 'D', 'E', 'F', 'G', 'A', 'B', 'C'],
-  'G Major':  ['G', 'A', 'B', 'C', 'D', 'E', 'F#', 'G'],
-  'F Major':  ['F', 'G', 'A', 'Bb', 'C', 'D', 'E', 'F'],
-  'D Minor':  ['D', 'E', 'F', 'G', 'A', 'Bb', 'C', 'D']
+  'C Maj':  ['C','D','E','F','G','A','B','c','d','e','f','g','a','b','c\''],
+  'G Maj':  ['G,','A,','B,','C','D','E','^F','G','A','B','c','d','e','^f','g'],
+  'D Maj':  ['D','E','^F','G','A','B','^c','d','e','^f','g','a','b','^c\'','d\''],
+  'A Maj':  ['A,','B,','^C','D','E','^F','^G','A','B','^c','d','e','^f','^g','a'],
+  'F Maj':  ['F,','G,','A,','_B,','C','D','E','F','G','A','_B','c','d','e','f'],
+  'Bb Maj': ['_B,','C','D','_E','F','G','A','_B','c','d','_e','f','g','a','_b'],
+  'Eb Maj': ['_E','F','G','_A','_B','c','d','_e','f','g','_a','_b','c\'','d\'','_e\''],
+  'A Min':  ['A,','B,','C','D','E','F','G','A','B','c','d','e','f','g','a'],
+  'D Min':  ['D','E','F','G','A','_B','C','d','e','f','g','a','_b','c\'','d\''],
+  'E Min':  ['E','^F','G','A','B','c','^d','e','^f','g','a','b','c\'','^d\'','e\''],
+  'C Pent': ['C','D','E','G','A','c','d','e','g','a','c\''],
+  'G Pent': ['G,','A,','B,','D','E','G','A','B','d','e','g'],
 };
 
-let currentMode = 'tuner';
-let selectedScale = 'C Major';
-let running = false;
-let rhythmInterval = null;
-let audioCtx, analyser, micStream;
+// キー→調号マッピング
+const KEY_MAP = {
+  'C Maj':'C', 'G Maj':'G', 'D Maj':'D', 'A Maj':'A',
+  'F Maj':'F', 'Bb Maj':'Bb', 'Eb Maj':'Eb',
+  'A Min':'Am', 'D Min':'Dm', 'E Min':'Em',
+  'C Pent':'C', 'G Pent':'G'
+};
 
-// ─── INITIALIZE ─────────────────────────────────────────────
-function initScaleButtons() {
+// =============================================
+// カタカナ変換テーブル
+// =============================================
+const KANA_MAP = {
+  'C':'ド',  'D':'レ',  'E':'ミ',  'F':'ファ', 'G':'ソ',  'A':'ラ',  'B':'シ',
+  '^C':'ド#', '^D':'レ#', '^F':'ファ#', '^G':'ソ#', '^A':'ラ#',
+  '_D':'レ♭', '_E':'ミ♭', '_G':'ソ♭', '_A':'ラ♭', '_B':'シ♭'
+};
+
+// abc記法の音符 → "カタカナ(英名)" 表記に変換
+function noteLabel(n) {
+  // オクターブ記号（, ' 数字）を除去して大文字化
+  const clean = n.replace(/[,\'0-9]/g, '').toUpperCase();
+
+  // 臨時記号（^ または _）の有無を確認
+  const hasAccidental = /^[\^_]/.test(clean);
+  const key = hasAccidental ? clean.slice(0, 2) : clean.slice(0, 1);
+
+  const kana = KANA_MAP[key] || key;
+  const accidental = hasAccidental
+    ? (clean[0] === '^' ? '#' : '♭')
+    : '';
+  const alpha = clean.replace(/[\^_]/g, '') + accidental;
+
+  return `${kana}(${alpha})`;
+}
+
+// =============================================
+// アプリ状態
+// =============================================
+let selectedScale = 'C Maj';
+let direction = 'up';
+let running = false;
+let step = 0;
+let timer = null;
+let bpm = 60;
+
+// =============================================
+// 演奏順の音符リストを返す
+// =============================================
+function getNotes() {
+  const base = SCALES[selectedScale];
+  if (direction === 'up')     return base;
+  if (direction === 'down')   return [...base].reverse();
+  // updown: 上行後に下行（頂点の音を重複させない）
+  return [...base, ...[...base].reverse().slice(1)];
+}
+
+// =============================================
+// 譜面描画（上行スケールを常に表示）
+// =============================================
+function buildABC() {
+  const base = SCALES[selectedScale];
+  const notes = base.join(' ');
+  const key = KEY_MAP[selectedScale] || 'C';
+  return `X:1\nM:C\nL:1/4\nK:${key}\n${notes} |]`;
+}
+
+// =============================================
+// 画面更新
+// =============================================
+function updateDisplay() {
+  const notes = getNotes();
+  const idx = step % notes.length;
+  const cur = notes[idx];
+
+  document.getElementById('targetNote').textContent = noteLabel(cur);
+  document.getElementById('stepInfo').textContent = `${idx + 1} / ${notes.length}`;
+  document.getElementById('dirInfo').textContent =
+    direction === 'updown'
+      ? (idx < SCALES[selectedScale].length ? '▲ 上行中' : '▼ 下行中')
+      : '';
+
+  ABCJS.renderAbc('sheetMusic', buildABC(), {
+    responsive: 'resize',
+    scale: 2.0,
+    staffwidth: 320,
+    paddingleft: 10,
+    paddingright: 10,
+  });
+}
+
+// =============================================
+// 方向切替
+// =============================================
+function setDir(d) {
+  direction = d;
+  step = 0;
+  document.querySelectorAll('.dir-btn').forEach(btn => btn.classList.remove('selected'));
+  document.getElementById('btn-' + d).classList.add('selected');
+  updateDisplay();
+}
+
+// =============================================
+// テンポ更新
+// =============================================
+function updateTempo() {
+  bpm = parseInt(document.getElementById('tempoSlider').value);
+  document.getElementById('bpmLabel').textContent = bpm;
+  if (running) {
+    clearInterval(timer);
+    timer = setInterval(tick, 60000 / bpm);
+  }
+}
+
+// =============================================
+// タイマーティック
+// =============================================
+function tick() {
+  step++;
+  updateDisplay();
+}
+
+// =============================================
+// START / STOP
+// =============================================
+function toggleStart() {
+  running = !running;
+  const btn = document.getElementById('startBtn');
+  if (running) {
+    btn.textContent = 'STOP';
+    btn.classList.add('running');
+    step = 0;
+    updateDisplay();
+    timer = setInterval(tick, 60000 / bpm);
+  } else {
+    btn.textContent = 'START';
+    btn.classList.remove('running');
+    clearInterval(timer);
+  }
+}
+
+// =============================================
+// 初期化
+// =============================================
+function init() {
   const container = document.getElementById('scaleSelector');
   Object.keys(SCALES).forEach(name => {
     const btn = document.createElement('button');
@@ -195,89 +424,17 @@ function initScaleButtons() {
     btn.textContent = name;
     btn.onclick = () => {
       selectedScale = name;
+      step = 0;
       document.querySelectorAll('.scale-btn').forEach(b => b.classList.remove('selected'));
       btn.classList.add('selected');
-      updateSheet();
+      updateDisplay();
     };
     container.appendChild(btn);
   });
-}
-initScaleButtons();
-updateSheet();
-
-// ─── UI FUNCTIONS ───────────────────────────────────────────
-function switchMode(mode) {
-  currentMode = mode;
-  document.getElementById('tunerMode').style.display = mode === 'tuner' ? 'flex' : 'none';
-  document.getElementById('scaleMode').style.display = mode === 'scale' ? 'flex' : 'none';
-  document.getElementById('tabTuner').classList.toggle('active', mode === 'tuner');
-  document.getElementById('tabScale').classList.toggle('active', mode === 'scale');
-  updateSheet();
+  updateDisplay();
 }
 
-function updateSheet() {
-  let abcString = "";
-  if (currentMode === 'tuner') {
-    abcString = "X:1\nK:C\nL:1/4\n[CEG]"; // チューナー時は基本の和音表示
-  } else {
-    const notes = SCALES[selectedScale].map(n => n.replace('#', '^').replace('b', '_')).join(' ');
-    abcString = `X:1\nK:C\nL:1/4\n${notes}`;
-  }
-  ABCJS.renderAbc("sheetMusic", abcString, { responsive: 'resize', scale: 1.3 });
-}
-
-// ─── CONTROL FUNCTIONS ──────────────────────────────────────
-async function toggleMain() {
-  if (running) {
-    stopAll();
-  } else {
-    await startAll();
-  }
-}
-
-async function startAll() {
-  running = true;
-  document.getElementById('startBtn').textContent = 'STOP';
-  document.getElementById('startBtn').classList.add('running');
-
-  if (currentMode === 'scale') {
-    startRhythmGuide();
-  } else {
-    startTuner();
-  }
-}
-
-function stopAll() {
-  running = false;
-  document.getElementById('startBtn').textContent = 'START';
-  document.getElementById('startBtn').classList.remove('running');
-  if (rhythmInterval) clearInterval(rhythmInterval);
-  if (micStream) micStream.getTracks().forEach(t => t.stop());
-  document.getElementById('targetNote').textContent = "—";
-}
-
-function startRhythmGuide() {
-  let step = 0;
-  const notes = SCALES[selectedScale];
-  rhythmInterval = setInterval(() => {
-    if (!running) return;
-    document.getElementById('targetNote').textContent = notes[step % notes.length];
-    step++;
-  }, 1000); // 1秒間隔のリズムガイド
-}
-
-// チューナーの基本ロジック（簡易版）
-async function startTuner() {
-  try {
-    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    // ※本来はここで周波数解析を行いますが、今回はリズムと表示を優先
-    document.getElementById('tunerNote').textContent = "READY";
-  } catch (e) {
-    alert("マイク許可が必要です");
-  }
-}
-
+window.onload = init;
 </script>
 </body>
 </html>
